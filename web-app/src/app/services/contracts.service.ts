@@ -1,13 +1,12 @@
-
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { fromPromise } from 'rxjs/observable/fromPromise';
 import { environment } from '../../environments/environment';
 
 const Web3 = require('web3');
+import * as inputContract from '../../../build/contracts/wineSecure.json';
 declare var require: any;
 declare var window: any;
-
 
 @Injectable()
 export class ContractsService {
@@ -15,180 +14,46 @@ export class ContractsService {
   public web3: any;
   public wineContract : any;
   address: string="0xa1581bdbe42e802c4100a6a22426d32deaf542e8";
-  public filter: any;
 
   constructor() { 
     this.checkAndInstantiateWeb3();
-    this.registerContract();
+    this.registerContract(this.address);
   }
 
+  private tokenAbi : any; 
+  private bytecode : any; 
 
-  registerContract() {
-
-    let tokenAbi = [
-      {
-        "constant": true,
-        "inputs": [],
-        "name": "wineCharacteristics",
-        "outputs": [
-          {
-            "name": "grapeVariety",
-            "type": "string"
-          },
-          {
-            "name": "colour",
-            "type": "string"
-          },
-          {
-            "name": "alcoholLevel",
-            "type": "uint256"
-          },
-          {
-            "name": "acidLevel",
-            "type": "string"
-          },
-          {
-            "name": "phenolicContent",
-            "type": "string"
-          },
-          {
-            "name": "sugarLevel",
-            "type": "uint256"
-          },
-          {
-            "name": "minerals",
-            "type": "string"
-          },
-          {
-            "name": "co2",
-            "type": "uint256"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "constant": true,
-        "inputs": [],
-        "name": "owner",
-        "outputs": [
-          {
-            "name": "",
-            "type": "address"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "constant": true,
-        "inputs": [
-          {
-            "name": "",
-            "type": "uint256"
-          }
-        ],
-        "name": "supplyChain",
-        "outputs": [
-          {
-            "name": "source",
-            "type": "address"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-      },
-      {
-        "payable": true,
-        "stateMutability": "payable",
-        "type": "fallback"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": false,
-            "name": "owner",
-            "type": "address"
-          },
-          {
-            "indexed": false,
-            "name": "message",
-            "type": "string"
-          }
-        ],
-        "name": "TransferOwnership",
-        "type": "event"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": false,
-            "name": "message",
-            "type": "string"
-          },
-          {
-            "indexed": false,
-            "name": "setting",
-            "type": "string"
-          }
-        ],
-        "name": "CharacteristicsSet",
-        "type": "event"
-      },
-      {
-        "constant": false,
-        "inputs": [],
-        "name": "kill",
-        "outputs": [],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "constant": false,
-        "inputs": [
-          {
-            "name": "variety",
-            "type": "string"
-          }
-        ],
-        "name": "grapeVariety",
-        "outputs": [],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "constant": false,
-        "inputs": [
-          {
-            "name": "newOwner",
-            "type": "address"
-          }
-        ],
-        "name": "transferOwnership",
-        "outputs": [],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-      }
-    ];
-   this.wineContract = new this.web3.eth.Contract(tokenAbi, this.address)
+  registerContract(address: string) {    
+   this.tokenAbi = (<any>inputContract).abi;
+   this.bytecode = (<any>inputContract).bytecode;
+   this.wineContract = new this.web3.eth.Contract(this.tokenAbi, address)
     console.log(this.wineContract);
   }
 
-  public getCharacteristics() : void {
+  public deployContract(account : string) : void {
+    var newContract = new this.web3.eth.Contract(this.tokenAbi, this.address);
+    const p = newContract.deploy({
+      data:this.bytecode,
+  })
+  .send({
+      gas: 4000000,
+      gasLimit: 4000000,
+      from: account,
+   })
+  .catch(e=> {
+    console.error('deployContract error', e);
+    throw e;
+  })
+  .then(function(newContractInstance){
+    if(newContractInstance){
+      console.log(`Adress`, newContractInstance.options.address);
+    }
+    return newContractInstance;
+  });
+  }
+
+  public getCharacteristics(address : string) : void {
+    this.registerContract(address);
     this.wineContract.methods.wineCharacteristics.call().call((error, result) => {
       console.log(result);
     });

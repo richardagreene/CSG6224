@@ -9,7 +9,7 @@ import { ContractsService } from './services/contracts.service';
 export class AppComponent {
 
   title = 'Web-app';
-  address : string="0xa1581bdbe42e802c4100a6a22426d32deaf542e8";
+  address : string="0xC8E7B3BEA72Bf001f28d7F00b02aee826B5C7571";
   result : string;
   account : any;
   accounts : any;
@@ -33,7 +33,10 @@ export class AppComponent {
   }
 
   async details() {
-    this.contacts.getCharacteristics();
+    this.contacts.getCharacteristics(this.address);
+  }
+  async deploy() {
+    this.contacts.deployContract(this.account);
   }
 
 }

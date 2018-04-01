@@ -1,0 +1,15 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<div style="text-align:center">
+  <h1>
+    Welcome to {{ title }}!
+  </h1>
+
+  <span>Account: {{account}}</span>
+  <input type="text" placeholder="wineAddress" [(ngModel)]="address" />
+  <span>{{result}}</span>
+
+  <input type="text" placeholder="characteristics" [(ngModel)]="grapeVariety" /><br />
+  <button (click)="setGrapeVariety()">set</button><br />
+  <button (click)="details()" text="grapeVariety"></button><br />
+
+</div>

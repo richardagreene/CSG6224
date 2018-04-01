@@ -103,3 +103,8 @@ If you have any issues with compiling or don't want to use Visual Studio Code, t
 
 
 Any contributions and suggestions are welcome!
+
+
+MetaMask 
+- password
+- "arrange topple orange urge excess expect seven lounge vast real mercy head"

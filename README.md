@@ -108,3 +108,5 @@ Any contributions and suggestions are welcome!
 MetaMask 
 - password
 - "arrange topple orange urge excess expect seven lounge vast real mercy head"
+
+ganache-cli

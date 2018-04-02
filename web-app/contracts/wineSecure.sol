@@ -5,11 +5,14 @@ contract wineSecure {
     address public owner;
 
     /* Define variables that store Wine details */
-    WineCharacteristics public wineCharacteristics;
+    WineDetails public wineDetail;
+    ChemicalAnalysis chemicalAnalysis;
+    GeographicalIndication geographicalIndication;
+    QualityTerm qualityTerm;   //fortified/specialised wine only
 
     /* Define a public event */
     event TransferOwnership(address owner, string message);
-    event CharacteristicsSet(string message, string setting);
+    event DetailsSet(string message);
 
     /* Collection of shareHolders */
     SupplyChain[] public supplyChain;
@@ -20,19 +23,30 @@ contract wineSecure {
     }
 
     /* data structure to hold information on wine */
-    struct WineCharacteristics {
+    struct WineDetails {
+        string name;
+        string vineyard;
         string grapeVariety;
         string colour;
         uint alcoholLevel;
-//        string pressing;
-//        string Fermentation;
-//        string additives;
+        string status;
+    }
+
+    struct ChemicalAnalysis {
         string acidLevel;
         string phenolicContent;
         uint sugarLevel;
         string minerals;
         uint co2;
     }
+
+    struct GeographicalIndication {
+        string state;
+        string region;
+        string subregion;
+    } 
+    // ref https://www.wineaustralia.com/labelling/register-of-protected-gis-and-other-terms
+    enum QualityTerm { Cream, Crusted, Ruby, Solera, Tawny, Vintage, Icewine, MethodeChampenoise, Moscato }
 
     /* Function to delete all information on the contract */
     function kill() public { 
@@ -41,19 +55,40 @@ contract wineSecure {
     }
 
     /* this runs when the contract is created  */
-    function wineSecure() public {
+    function wineSecure(
+        string name,
+        string vineyard,
+        string grapeVariety,
+        string colour,
+        uint alcoholLevel
+    ) public {
         // set the owner to be the creator of the contract
         owner = msg.sender;
-        // init the supply chain and add this owner
+        wineDetail.name = name;
+        wineDetail.vineyard = vineyard;
+        wineDetail.grapeVariety = grapeVariety;
+        wineDetail.colour = colour;
+        wineDetail.alcoholLevel = alcoholLevel;
+        wineDetail.status = "registered";
+        // init the record and supply chain records 
         supplyChain.push(SupplyChain({source : owner}));
     }
 
-    function grapeVariety(string variety) public  {
+    function setDetails( 
+        string name,
+        string vineyard,
+        string grapeVariety,
+        string colour,
+        uint alcoholLevel) public  {
         // only the current owner can set the values
         if (msg.sender != owner) return; 
         // send an event 
-        wineCharacteristics.grapeVariety = variety;
-        emit CharacteristicsSet("Variety changed to:", variety);
+        wineDetail.name = name;
+        wineDetail.vineyard = vineyard;
+        wineDetail.grapeVariety = grapeVariety;
+        wineDetail.colour = colour;
+        wineDetail.alcoholLevel = alcoholLevel;
+        emit DetailsSet("Details set");
     }
 
     function transferOwnership(address newOwner) public {
@@ -64,19 +99,6 @@ contract wineSecure {
         // send an event 
         emit TransferOwnership(msg.sender, "Wine ownership has been transfered");
     }
-
-    // *******************************
-    // The function to loop over all 
-    // funders to find the highest
-    // *******************************
-    /*
-    function getTopFunder() {
-        uint amount=0;
-        for(uint i=0;i<funders.length;i++)
-            if(amount < funders[i].amount)
-                _topFunder = funders[i].addr;
-    }
-    */
 
     // *******************************
     // The function without name will prevent any

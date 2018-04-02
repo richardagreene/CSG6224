@@ -30,33 +30,92 @@ export class ContractsService {
     console.log(this.wineContract);
   }
 
-  public deployContract(account : string) : void {
-    var newContract = new this.web3.eth.Contract(this.tokenAbi, this.address);
-    const p = newContract.deploy({
-      data:this.bytecode,
-  })
-  .send({
-      gas: 4000000,
-      gasLimit: 4000000,
-      from: account,
-   })
-  .catch(e=> {
-    console.error('deployContract error', e);
-    throw e;
-  })
-  .then(function(newContractInstance){
-    if(newContractInstance){
-      console.log(`Adress`, newContractInstance.options.address);
-    }
-    return newContractInstance;
-  });
+  public deployContract(account : string, wineDetails : any) : Promise<string> {
+    return new Promise((resolve, reject) => {
+        var newContract = new this.web3.eth.Contract(this.tokenAbi, this.address);
+        const p = newContract.deploy( {
+          arguments : [
+          wineDetails.name, 
+          wineDetails.vineyard, 
+          wineDetails.grapeVariety,
+          wineDetails.colour,
+          wineDetails.alcoholLevel
+          ], data:this.bytecode,
+      })
+      .send({
+          gas: 4000000,
+          gasLimit: 4000000,
+          from: account,
+      })
+      .catch(e=> {
+        console.error('deployContract error', e);
+        reject(e);
+      })
+      .then(function(newContractInstance){
+        if(newContractInstance){
+          console.log(`Adress`, newContractInstance.options.address);
+        }
+        return resolve(newContractInstance.options.address);
+      });
+    });
   }
 
-  public getCharacteristics(address : string) : void {
-    this.registerContract(address);
-    this.wineContract.methods.wineCharacteristics.call().call((error, result) => {
-      console.log(result);
+  public getDetails(address : string) : Observable<any> {
+      return Observable.create(observer => {
+        this.tokenAbi = (<any>inputContract).abi;
+        let contract = new this.web3.eth.Contract(this.tokenAbi, address)
+        contract.methods.wineDetail.call().call((err, result) => {
+          if (err != null) {
+            observer.error('There was an error fetching your accounts.')
+          }
+          observer.next(result);
+          observer.complete();
+        });
+      });
+  }
+
+  public getSupplyChain(address : string) : Observable<any> {
+    return Observable.create(observer => {
+      this.tokenAbi = (<any>inputContract).abi;
+      let contract = new this.web3.eth.Contract(this.tokenAbi, address);
+      contract.methods.supplyChain().call((err, result) => {
+        if (err != null) {
+          observer.error('There was an error fetching your accounts.')
+        }
+        observer.next(result);
+        observer.complete();
+      });
     });
+  }
+
+  public getOwner(address : string) : Observable<any> {
+    return Observable.create(observer => {
+      this.tokenAbi = (<any>inputContract).abi;
+      let contract = new this.web3.eth.Contract(this.tokenAbi, address);
+      contract.methods.owner().call((err, result) => {
+        if (err != null) {
+          observer.error('There was an error fetching your accounts.')
+        }
+        observer.next(result);
+        observer.complete();
+      });
+    });
+  }
+
+  public history(address : string) : Observable<any> {
+    return Observable.create(observer => {
+      this.tokenAbi = (<any>inputContract).abi;
+      let contract = new this.web3.eth.Contract(this.tokenAbi, address);
+      contract.getPastEvents("TransferOwnership", {
+        fromBlock: 0,
+        toBlock: 'latest'
+      },
+        function(error, events) { })
+          .then(function(events){
+              observer.next(events);
+              observer.complete();
+          });
+      });
   }
 
   checkAndInstantiateWeb3 = () => {
@@ -93,11 +152,25 @@ export class ContractsService {
   	})
   }
 
-  setCharacteristics(account : string, address : string, value : string)  {
-    console.log(account);
-    console.log(address);
-    console.log(value);
+  transfer (contractAddress: string, account : string, toaccount : string) : Observable<any> {
+    return Observable.create(observer => {
+      this.tokenAbi = (<any>inputContract).abi;
+      let contract = new this.web3.eth.Contract(this.tokenAbi, contractAddress);
+      contract.methods.transferOwnership(toaccount).send({from: account})
+      .on('transactionHash', function(hash){
+        console.log("hash" + hash);
+      })
+      .on('receipt', function(receipt){
+        console.log("here");
+      })
+      .on('confirmation', function(confirmationNumber, receipt){
+        console.log("conf");
+      })
+      .on('error', console.error);
+    });
+  }
 
+  setCharacteristics(account : string, address : string, value : string)  {
     this.wineContract.methods.owner.call().call((error, result) => {
       console.log(result);
     });

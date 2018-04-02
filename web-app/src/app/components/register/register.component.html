@@ -1,0 +1,72 @@
+<div class="py-5 text-center">
+    <img class="d-block mx-auto mb-4" src="assets/wineSecure.png" alt="" width="72" height="72">
+    <h2>Register Wine as {{account}}</h2>
+  </div>
+
+  
+  <div class="row">
+    <div class="col-md-4 order-md-2 mb-4" *ngIf="contractAvailable">
+      <h4 class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted">Details</span>
+      </h4>
+      <ul class="list-group mb-3">
+        <li class="list-group-item d-flex justify-content-between lh-condensed">
+          <qrcode [qrdata]="contractQrCode" [size]="256" [level]="'M'"></qrcode>
+        </li>
+        <li class="list-group-item d-flex justify-content-between lh-condensed">
+          <span class="text-muted small">{{contract}}</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="col-md-8 order-md-1">
+      <h4 class="mb-3">Your wine details</h4>
+      <h6 class="mb-3"></h6>
+      <form class="needs-validation" novalidate>
+        <div class="mb-3">
+          <label for="name">Name</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="name" [(ngModel)]="wineDetails.name" [ngModelOptions]="{standalone: true}" placeholder="name of wine" required>
+            <div class="invalid-feedback" style="width: 100%;">
+              Name is required.
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="vineyard">vineyard</label>
+          <input type="text" class="form-control" id="vineyard" [(ngModel)]="wineDetails.vineyard" [ngModelOptions]="{standalone: true}" placeholder="vineyard" required>
+          <div class="invalid-feedback">
+            Please enter your vineyard.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="grapeVariety">grapeVariety</label>
+          <input type="text" class="form-control" id="grapeVariety" [(ngModel)]="wineDetails.grapeVariety" [ngModelOptions]="{standalone: true}" placeholder="grapeVariety" required>
+          <div class="invalid-feedback">
+            Please enter your grape Variety.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="colour">colour</label>
+          <input type="text" class="form-control" id="colour" [(ngModel)]="wineDetails.colour" [ngModelOptions]="{standalone: true}" placeholder="red, white" required>
+          <div class="invalid-feedback">
+            colour
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="alcoholLevel">alcoholLevel</label>
+          <input type="text" class="form-control" id="alcoholLevel" [(ngModel)]="wineDetails.alcoholLevel" [ngModelOptions]="{standalone: true}" placeholder="0 %" required>
+          <div class="invalid-feedback">
+            Please enter the alcohol Level.
+          </div>
+        </div>
+
+        <hr class="mb-4">
+        <button class="btn btn-primary btn-lg btn-block" (click)="deploy()">Submit</button>
+      </form>
+    </div>
+</div>
